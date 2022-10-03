@@ -1,6 +1,7 @@
 from sys import argv
 from time import time
 from kata_anagrams_weabreu import anagrams
+from urllib import request
 
 def run_normal(words_list: list[str]) -> None:
     start_time = time()
@@ -28,15 +29,41 @@ def run_advanced(words_list: list[str]) -> None:
     print("Most Words Set:", most_words_set)
     print("Time:", end_time - start_time)
 
+def run_streaming( url ):
+    analyzer = anagrams.AnagramsAnalyzer()
+    stream = request.urlopen( url )
+
+    for line in stream:
+        word = line.decode("latin-1").replace("\n", "")
+        analyzer.load_word( word )
+
+    start_time = time()
+    anagrams_set = analyzer.get_anagrams()
+    end_time = time()
+
+    for anagram_set in anagrams_set:
+        print( anagram_set )
+    
+    print("Set Count:", analyzer.get_set_count())
+    print("Words Count:", analyzer.get_anagrams_words_count())
+    print("Longest Word Set:", analyzer.get_longest_word_set())
+    print("Most Words Set:", analyzer.get_most_words_set())
+    print("Time:", end_time - start_time)
+
 def main():
     
     words_list = ""
-    file_path = argv[1]
+    url_path = argv[1]
 
-    with open(file_path, "r") as fp:
-        words_list = fp.read().splitlines()
+    if not argv.__contains__("--full"):
+        run_streaming( url_path )
+        return
 
-    if len(argv) == 3 and argv[2] == "--advanced":
+    with request.urlopen( url_path ) as resp:
+        data: str = resp.read().decode("latin-1")
+        words_list = data.splitlines()
+
+    if argv.__contains__("--advanced"):
         run_advanced( words_list )
     else:
         run_normal( words_list )
