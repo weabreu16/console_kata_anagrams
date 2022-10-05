@@ -33,6 +33,7 @@ def run_streaming( url ):
     analyzer = anagrams.AnagramsAnalyzer()
     stream = request.urlopen( url )
 
+    start_load_time = time()
     for line in stream:
         word = line.decode("latin-1").replace("\n", "")
         analyzer.load_word( word )
@@ -40,6 +41,7 @@ def run_streaming( url ):
     start_time = time()
     anagrams_set = analyzer.get_anagrams()
     end_time = time()
+    end_load_time = time()
 
     for anagram_set in anagrams_set:
         print( anagram_set )
@@ -49,6 +51,7 @@ def run_streaming( url ):
     print("Longest Word Set:", analyzer.get_longest_word_set())
     print("Most Words Set:", analyzer.get_most_words_set())
     print("Time:", end_time - start_time)
+    print("Load Time:", end_load_time - start_load_time)
 
 def main():
     
@@ -59,6 +62,7 @@ def main():
         run_streaming( url_path )
         return
 
+    start_load_time = time()
     with request.urlopen( url_path ) as resp:
         data: str = resp.read().decode("latin-1")
         words_list = data.splitlines()
@@ -67,6 +71,9 @@ def main():
         run_advanced( words_list )
     else:
         run_normal( words_list )
+    end_load_time = time()
+
+    print("Load Time:", end_load_time - start_load_time)
 
 if __name__ == "__main__":
     main()
